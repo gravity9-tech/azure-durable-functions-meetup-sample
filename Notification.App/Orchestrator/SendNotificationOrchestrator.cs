@@ -1,11 +1,8 @@
 using System;
 using System.Threading.Tasks;
-using DurableTask.Core.Entities;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.DurableTask;
-using Microsoft.DurableTask.Client;
 using Microsoft.DurableTask.Entities;
-using Microsoft.Extensions.Logging;
 using Notification.App.Acitvities;
 using Notification.App.Entities;
 using Notification.App.Models;
@@ -19,12 +16,12 @@ namespace Notification.App.Orchestrator;
         {
             var input = context.GetInput<SendNotificationOrchestratorInput>();
             // Use Durable Entity to store orchestrator instanceId based on phonenumber
-            var entityId = new EntityInstanceId(nameof(NotificationOrchestratorInstanceEntity), input.SupportContact.PhoneNumber);
+            var entityId = new EntityInstanceId(nameof(NotificationOrchestratorInstanceEntity), input.SupportContact.PhoneNumber); 
             await context.Entities.SignalEntityAsync(
                 entityId,
-                nameof(NotificationOrchestratorInstanceEntity.Set),
-                context.InstanceId);
-
+                "Set",
+                context.InstanceId
+                );
             var activityInput = new SendNotificationActivityInput { 
                 Attempt = input.NotificationAttemptCount,
                 Message = input.Message,

@@ -5,22 +5,19 @@ using Newtonsoft.Json;
 
 namespace Notification.App.Entities;
 
-[JsonObject(MemberSerialization.OptIn)]
-public class NotificationOrchestratorInstanceEntity : TaskEntity<string>
+public class NotificationOrchestratorInstanceEntity
 {
-    [JsonProperty("instanceId")]
     public string InstanceId { get; set; }
 
-    public Task Set(string instanceId)
+    public void Set(string instanceId)
     {
         InstanceId = instanceId;
-        return Task.CompletedTask;
     }
 
     public void Reset() => InstanceId = string.Empty;
-    
-    public Task<string> Get() => Task.FromResult(InstanceId);
+
+    public string Get() => InstanceId;
 
     [Function(nameof(NotificationOrchestratorInstanceEntity))]
-    public static Task Run([EntityTrigger]TaskEntityDispatcher ctx) => ctx.DispatchAsync<NotificationOrchestratorInstanceEntity>();
+    public static Task RunEntityAsync([EntityTrigger]TaskEntityDispatcher ctx) => ctx.DispatchAsync<NotificationOrchestratorInstanceEntity>();
 }
