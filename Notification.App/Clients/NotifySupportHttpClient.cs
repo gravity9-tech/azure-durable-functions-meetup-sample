@@ -1,9 +1,13 @@
 using System;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.DurableTask;
-using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.DurableTask;
+using Microsoft.DurableTask.Client;
 using Microsoft.Extensions.Logging;
 using Notification.App.Models;
 using Notification.App.Orchestrator;
@@ -12,12 +16,11 @@ namespace Notification.App.Clients;
 
 public class NotifySupportHttpClient
 {
-    [FunctionName(nameof(NotifySupportHttpClient))]
-    public static async Task<HttpResponseMessage> Run(
-        [HttpTrigger(AuthorizationLevel.Function, nameof(HttpMethod.Post), Route = null)] HttpRequestMessage message, [DurableClient] IDurableClient client,
-        ILogger logger)
+    [Function(nameof(NotifySupportHttpClient))]
+    public async Task<HttpResponseData> Run(
+        [HttpTrigger(AuthorizationLevel.Function, "POST", Route = null)] HttpRequestData message, [DurableClient] DurableTaskClient client)
     {
-        var clientInput = await message.Content.ReadAsAsync<NotifySupportClientInput>();
+        var clientInput = await message.ReadFromJsonAsync<NotifySupportClientInput>();
         var waitTimeForEscalationInSeconds = 60;
         var maxNotificationAttempts = 3;
 
@@ -30,11 +33,10 @@ public class NotifySupportHttpClient
             Severity = clientInput.Severity,
             WaitTimeForEscalationInSeconds = waitTimeForEscalationInSeconds
         };
-
-        string instanceId = await client.StartNewAsync(
+        string instanceId = await client.ScheduleNewOrchestrationInstanceAsync(
             nameof(NotifySupportOrchestrator),
             orchestratorInput);
 
-        return client.CreateCheckStatusResponse(message, instanceId);
+        return await client.CreateCheckStatusResponseAsync(message, instanceId);
     }
 }

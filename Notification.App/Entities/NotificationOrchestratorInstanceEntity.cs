@@ -1,20 +1,26 @@
 using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.DurableTask.Entities;
 using Newtonsoft.Json;
 
 namespace Notification.App.Entities;
 
 [JsonObject(MemberSerialization.OptIn)]
-public class NotificationOrchestratorInstanceEntity
+public class NotificationOrchestratorInstanceEntity : TaskEntity<string>
 {
     [JsonProperty("instanceId")]
     public string InstanceId { get; set; }
 
-    public void Set(string instanceId) => InstanceId = instanceId;
+    public Task Set(string instanceId)
+    {
+        InstanceId = instanceId;
+        return Task.CompletedTask;
+    }
 
     public void Reset() => InstanceId = string.Empty;
+    
+    public Task<string> Get() => Task.FromResult(InstanceId);
 
-    [FunctionName(nameof(NotificationOrchestratorInstanceEntity))]
-    public static Task Run([EntityTrigger] IDurableEntityContext ctx) => ctx.DispatchAsync<NotificationOrchestratorInstanceEntity>();
+    [Function(nameof(NotificationOrchestratorInstanceEntity))]
+    public static Task Run([EntityTrigger]TaskEntityDispatcher ctx) => ctx.DispatchAsync<NotificationOrchestratorInstanceEntity>();
 }

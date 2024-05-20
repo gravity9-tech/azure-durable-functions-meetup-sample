@@ -1,20 +1,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.DurableTask;
 using Microsoft.Extensions.Logging;
 using Notification.App.Acitvities;
 using Notification.App.Models;
 
 namespace Notification.App.Orchestrator;
 
-public class NotifySupportOrchestrator
+public class NotifySupportOrchestrator(ILogger<NotifySupportOrchestrator> logger)
 {
-    [FunctionName(nameof(NotifySupportOrchestrator))]
+    [Function(nameof(NotifySupportOrchestrator))]
     public async Task Run(
-        [OrchestrationTrigger] IDurableOrchestrationContext context,
-        ILogger logger)
+        [OrchestrationTrigger] TaskOrchestrationContext context)
     {
         var input = context.GetInput<NotifySupportOrchestratorInput>();
 
@@ -23,7 +22,7 @@ public class NotifySupportOrchestrator
             // Let's get the support contacts from storage.
             var supportContacts = await context.CallActivityAsync<IEnumerable<Contact>>(
                 nameof(GetContactActivity),
-                "A");
+                "Support");
 
             input.Contacts = supportContacts.ToArray();
         }
