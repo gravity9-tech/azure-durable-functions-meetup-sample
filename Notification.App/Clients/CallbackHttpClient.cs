@@ -19,12 +19,12 @@ public class CallbackHttpClient(ILogger<CallbackHttpClient> logger)
             Route = null)] HttpRequestData message, [DurableClient] DurableTaskClient client)
     {
         var phoneNumber = await message.ReadFromJsonAsync<string>();
-        var entityId = new EntityInstanceId(nameof(NotificationOrchestratorInstanceEntity), phoneNumber);
-        var instanceEntity = await client.Entities.GetEntityAsync<string>(entityId);
+        var entityId = new EntityInstanceId(nameof(NotificationEntity), phoneNumber);
+        var instanceEntity = await client.Entities.GetEntityAsync<NotificationEntity>(entityId);
         if (instanceEntity?.State != null)
         {
             await client.RaiseEventAsync(
-                instanceEntity.State,
+                instanceEntity.State.InstanceId,
                 "Callback",
                 true);
         }

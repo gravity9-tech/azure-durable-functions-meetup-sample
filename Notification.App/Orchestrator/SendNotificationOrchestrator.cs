@@ -16,7 +16,7 @@ namespace Notification.App.Orchestrator;
         {
             var input = context.GetInput<SendNotificationOrchestratorInput>();
             // Use Durable Entity to store orchestrator instanceId based on phonenumber
-            var entityId = new EntityInstanceId(nameof(NotificationOrchestratorInstanceEntity), input.SupportContact.PhoneNumber); 
+            var entityId = new EntityInstanceId(nameof(NotificationEntity), input.SupportContact.PhoneNumber); 
             await context.Entities.SignalEntityAsync(
                 entityId,
                 "Set",
@@ -30,7 +30,7 @@ namespace Notification.App.Orchestrator;
                 nameof(SendNotificationActivity),
                 activityInput);
 
-            var waitTimeBetweenRetry = TimeSpan.FromSeconds(10);//(input.WaitTimeForEscalationInSeconds / input.MaxNotificationAttempts);
+            var waitTimeBetweenRetry = TimeSpan.FromSeconds(input.WaitTimeForEscalationInSeconds / input.MaxNotificationAttempts);
 
             // Orchestrator will wait until the event is received or waitTimeBetweenRetry is passed
             var callBackResult = false;

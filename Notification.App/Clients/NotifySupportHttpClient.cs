@@ -37,6 +37,6 @@ public class NotifySupportHttpClient
             nameof(NotifySupportOrchestrator),
             orchestratorInput);
 
-        return await client.CreateCheckStatusResponseAsync(message, instanceId);
+        return client.CreateCheckStatusResponse(message, instanceId);
     }
 }

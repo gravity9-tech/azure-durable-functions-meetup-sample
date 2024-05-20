@@ -1,11 +1,9 @@
 using System.Threading.Tasks;
 using Microsoft.Azure.Functions.Worker;
-using Microsoft.DurableTask.Entities;
-using Newtonsoft.Json;
 
 namespace Notification.App.Entities;
 
-public class NotificationOrchestratorInstanceEntity
+public class NotificationEntity
 {
     public string InstanceId { get; set; }
 
@@ -18,6 +16,6 @@ public class NotificationOrchestratorInstanceEntity
 
     public string Get() => InstanceId;
 
-    [Function(nameof(NotificationOrchestratorInstanceEntity))]
-    public static Task RunEntityAsync([EntityTrigger]TaskEntityDispatcher ctx) => ctx.DispatchAsync<NotificationOrchestratorInstanceEntity>();
+    [Function(nameof(NotificationEntity))]
+    public static Task RunEntityStaticAsync([EntityTrigger]TaskEntityDispatcher ctx) => ctx.DispatchAsync<NotificationEntity>();
 }

@@ -3,8 +3,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.DurableTask;
+using Microsoft.DurableTask.Entities;
 using Microsoft.Extensions.Logging;
 using Notification.App.Acitvities;
+using Notification.App.Entities;
 using Notification.App.Models;
 
 namespace Notification.App.Orchestrator;
@@ -35,7 +37,7 @@ public class NotifySupportOrchestrator(ILogger<NotifySupportOrchestrator> logger
             SupportContact = input.Contacts[input.ContactIndex],
             WaitTimeForEscalationInSeconds = input.WaitTimeForEscalationInSeconds
         };
-            
+        
         var notificationResult = await context.CallSubOrchestratorAsync<SendNotificationOrchestratorResult>(
             nameof(SendNotificationOrchestrator),
             notificationOrchestratorInput);
