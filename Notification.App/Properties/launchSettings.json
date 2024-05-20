@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Notification.App": {
+      "commandName": "Project",
+      "commandLineArgs": "--port 7169",
+      "launchBrowser": false
+    }
+  }
+}

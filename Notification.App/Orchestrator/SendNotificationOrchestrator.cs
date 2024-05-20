@@ -1,0 +1,53 @@
+using System;
+using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
+using Microsoft.Extensions.Logging;
+using Notification.App.Acitvities;
+using Notification.App.Entities;
+using Notification.App.Models;
+
+namespace Notification.App.Orchestrator;
+
+    public class SendNotificationOrchestrator
+    {
+        [FunctionName(nameof(SendNotificationOrchestrator))]
+        public async Task<SendNotificationOrchestratorResult> Run([OrchestrationTrigger] IDurableOrchestrationContext context, ILogger logger)
+        {
+            var input = context.GetInput<SendNotificationOrchestratorInput>();
+
+            // Use Durable Entity to store orchestrator instanceId based on phonenumber
+            var entityId = new EntityId(nameof(NotificationOrchestratorInstanceEntity), input.SupportContact.PhoneNumber);
+            context.SignalEntity(
+                entityId,
+                nameof(NotificationOrchestratorInstanceEntity.Set),
+                context.InstanceId);
+
+            var activityInput = new SendNotificationActivityInput { 
+                Attempt = input.NotificationAttemptCount,
+                Message = input.Message,
+                PhoneNumber = input.SupportContact.PhoneNumber};
+            await context.CallActivityAsync(
+                nameof(SendNotificationActivity),
+                activityInput);
+            
+            var waitTimeBetweenRetry = TimeSpan.FromSeconds(input.WaitTimeForEscalationInSeconds / input.MaxNotificationAttempts);
+
+            // Orchestrator will wait until the event is received or waitTimeBetweenRetry is passed, defaults to false.
+            var callBackResult = await context.WaitForExternalEvent<bool>("Callback", waitTimeBetweenRetry, false);
+            if (!callBackResult && input.NotificationAttemptCount < input.MaxNotificationAttempts)
+            {
+                // Call has not been answered, let's try again!
+                input.NotificationAttemptCount++;
+                context.ContinueAsNew(input);
+            }
+
+            // Call has been answered or MaxNotificationAttempts has been reached.
+            var result = new SendNotificationOrchestratorResult {
+                Attempt  = input.NotificationAttemptCount,
+                PhoneNumber = input.SupportContact.PhoneNumber,
+                CallbackReceived = callBackResult };
+
+            return result;
+        }
+    }
