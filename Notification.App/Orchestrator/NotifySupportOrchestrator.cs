@@ -47,12 +47,12 @@ public class NotifySupportOrchestrator(ILogger<NotifySupportOrchestrator> logger
         {
             // Calls have not been answered, let's try the next contact.
             input.ContactIndex++;
-            logger.LogInformation($"=== Next Contact={input.Contacts[input.ContactIndex].PhoneNumber} ===");
+            logger.LogWarning($"=== Next Contact={input.Contacts[input.ContactIndex].PhoneNumber} ===");
             context.ContinueAsNew(input);
         }
         else
         {
-            logger.LogInformation($"=== Completed {nameof(NotifySupportOrchestrator)} for {notificationResult.PhoneNumber} with callback received={notificationResult.CallbackReceived} on attempt={notificationResult.Attempt}. ===");
+            logger.LogWarning($"=== Completed {nameof(NotifySupportOrchestrator)} for {notificationResult.PhoneNumber} with callback received={notificationResult.CallbackReceived} on attempt={notificationResult.Attempt}. ===");
         }
     }
 }

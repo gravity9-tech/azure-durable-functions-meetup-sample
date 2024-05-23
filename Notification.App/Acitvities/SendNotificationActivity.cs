@@ -12,6 +12,6 @@ public class SendNotificationActivity(ILogger<SendNotificationActivity> logger)
     [Function(nameof(SendNotificationActivity))]
     public void Run([ActivityTrigger] SendNotificationActivityInput input, [DurableClient] DurableTaskClient client)
     {
-        logger.LogInformation($"Notification sent to {input.PhoneNumber} with message: {input.Message}");
+        logger.LogWarning($"Notification sent to {input.PhoneNumber} with message: {input.Message}");
     }
 }

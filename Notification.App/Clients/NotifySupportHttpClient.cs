@@ -18,7 +18,8 @@ public class NotifySupportHttpClient
 {
     [Function(nameof(NotifySupportHttpClient))]
     public async Task<HttpResponseData> Run(
-        [HttpTrigger(AuthorizationLevel.Function, "POST", Route = null)] HttpRequestData message, [DurableClient] DurableTaskClient client)
+        [HttpTrigger(AuthorizationLevel.Function, "POST", Route = null)] HttpRequestData message, 
+        [DurableClient] DurableTaskClient client)
     {
         var clientInput = await message.ReadFromJsonAsync<NotifySupportClientInput>();
         var waitTimeForEscalationInSeconds = 60;
